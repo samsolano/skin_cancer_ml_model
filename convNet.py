@@ -46,7 +46,13 @@ IMG_SIZE = 50
 #                 continue
 
 
+
+
 # create_training_data()
+
+
+        ## plt.imshow(img_array[0], cmap='gray')                                              # figure out how these plt functions work specifically
+        ## plt.show()
 
 # random.shuffle(training_data)           # currently its all dog pictures then cat pictures, so shuffle so network doesnt learn to just guess dog then cat
 
@@ -137,4 +143,4 @@ model.fit(x, y, batch_size=32, epochs=10, validation_split=0.2)
 # Todo: 
 # figure out how to get this working with color and in original spec of 224x224
 # have to adjust network to account for unequal amount of benign vs malignant
-# manually split up data, and just fit model then run it on our separate testing data
+# manually split up data, and just fit model then run it on our separate testing data, so no more validation split
