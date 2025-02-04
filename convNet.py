@@ -28,7 +28,7 @@ import pickle
 
 DATADIR = "/Users/samsolano/Documents/WorkFolder/SeniorProject/Skin_Cancer_Archive/train"
 CATEGORIES = ["benign", "malignant"]
-IMG_SIZE = 50
+# IMG_SIZE = 50
 
 
 # training_data = []
@@ -39,20 +39,20 @@ IMG_SIZE = 50
 #         class_num = CATEGORIES.index(category)
 #         for img in os.listdir(path):
 #             try:
-#                 img_array = cv2.imread(os.path.join(path, img), cv2.IMREAD_GRAYSCALE)           # get rid of grayscale eventually because color is important 
-#                 new_array = cv2.resize(img_array, (IMG_SIZE, IMG_SIZE))                         # figure out what these plt functions do
-#                 training_data.append([new_array, class_num])
+#                 img_array = cv2.imread(os.path.join(path, img))           # get rid of grayscale eventually because color is important 
+#                 # new_array = cv2.resize(img_array, (IMG_SIZE, IMG_SIZE))                         # figure out what these plt functions do
+#                 img_array = cv2.cvtColor(img_array, cv2.COLOR_BGR2RGB)
+#                 training_data.append([img_array, class_num])
 #             except Exception as e:
 #                 continue
-
 
 
 
 # create_training_data()
 
 
-        ## plt.imshow(img_array[0], cmap='gray')                                              # figure out how these plt functions work specifically
-        ## plt.show()
+# # plt.imshow(img_array[0], cmap='gray')                                              # figure out how these plt functions work specifically
+# # plt.show()
 
 # random.shuffle(training_data)           # currently its all dog pictures then cat pictures, so shuffle so network doesnt learn to just guess dog then cat
 
@@ -63,7 +63,7 @@ IMG_SIZE = 50
 #     y.append(label)
 
 
-# x = np.array(x).reshape(-1, IMG_SIZE, IMG_SIZE, 1)     # Figure out wtf these functions are and why x has to be numpy array!!!!!    -1 is for all features, 1 is for gray scale, would be 3 for full color
+# x = np.array(x)    # Figure out wtf these functions are and why x has to be numpy array!!!!!    -1 is for all features/pics, 1 is for gray scale, would be 3 for full color
 
 # pickle_out = open("x.pickle", "wb")
 # pickle.dump(x, pickle_out)
@@ -140,7 +140,6 @@ model.fit(x, y, batch_size=32, epochs=10, validation_split=0.2)
 
 
 
-# Todo: 
-# figure out how to get this working with color and in original spec of 224x224
+# Todo:
 # have to adjust network to account for unequal amount of benign vs malignant
 # manually split up data, and just fit model then run it on our separate testing data, so no more validation split
