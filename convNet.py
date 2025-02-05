@@ -1,23 +1,4 @@
-# for category in CATEGORIES:
-#     path = os.path.join(DATADIR, category)
-#     for img in os.listdir(path):
-#         img_array = cv2.imread(os.path.join(path, img), cv2.IMREAD_GRAYSCALE)           #get rid of grayscale eventually because color is important
-#         plt.imshow(img_array, cmap='gray')                                              # figure out what these plt functions do
-#         plt.show()
-#         # print(img_array.shape) 
-
-#         break
-#     break
-
-# print(img_array.shape) # Somehow i can print the last img_array even though its out of scope
-
-# This is for resizing but all of our photos are 224x224 so not really a problem perhaps if u want to make it smaller to make processing faster
-
-# new_array = cv2.resize(img_array, (IMG_SIZE, IMG_SIZE))
-# plt.imshow(new_array, cmap='gray')
-# plt.show()
-
-
+#------------------------------------------------------------Code to Normalize Data------------------------------------------------------------#
 
 import numpy as np              # to move through arrays
 import matplotlib.pyplot as plt # to show image
@@ -28,7 +9,6 @@ import pickle
 
 DATADIR = "/Users/samsolano/Documents/WorkFolder/SeniorProject/Skin_Cancer_Archive/train"
 CATEGORIES = ["benign", "malignant"]
-# IMG_SIZE = 50
 
 
 # training_data = []
@@ -79,54 +59,106 @@ CATEGORIES = ["benign", "malignant"]
 
 
 
-
-
-
-
-
-
-
-
-
+#----------------------------------------------------------Code to Train and Save Model------------------------------------------------------------#
 
 import tensorflow as tensorflow
 from tensorflow.keras.models import Sequential
 from tensorflow.keras.layers import Dense, Dropout, Activation, Conv2D, MaxPooling2D, Flatten, Input
 import pickle
 
-x = pickle.load(open("x.pickle","rb"))
-y = pickle.load(open("y.pickle","rb"))
+# x = pickle.load(open("x.pickle","rb"))
+# y = pickle.load(open("y.pickle","rb"))
 
-x = x/255.0
-y = np.array(y)
+# x = x/255.0
+# y = np.array(y)
 
-model = Sequential([
-    Input(shape=x.shape[1:]),
-    Conv2D(64, (3,3)),  
-    Activation("relu"),
-    MaxPooling2D(pool_size=(2,2)),
+# model = Sequential([
+#     Input(shape=x.shape[1:]), #can mess with shape too
+#     Conv2D(64, (3,3)),  
+#     Activation("relu"),
+#     MaxPooling2D(pool_size=(2,2)),
 
-    Conv2D(64, (3,3)),
-    Activation("relu"),
-    MaxPooling2D(pool_size=(2,2)),
+#     Conv2D(64, (3,3)),
+#     Activation("relu"),
+#     MaxPooling2D(pool_size=(2,2)),
 
-    Flatten(),
-    Dense(64),
-    Activation("relu"),
-    Dense(1),
-    Activation('sigmoid')
-])
+#     Flatten(),  # do i need this
+#     Dense(64),
+#     Activation("relu"),
+#     Dense(1),
+#     Activation('sigmoid')
+# ])
 
-model.compile(loss="binary_crossentropy",                #couldve been categorical_crossentropy
-              optimizer="adam",
-              metrics=['accuracy'])                    
-
-
-model.fit(x, y, batch_size=32, epochs=10, validation_split=0.2)
+# model.compile(loss="binary_crossentropy",                #couldve been categorical_crossentropy
+#               optimizer="adam",
+#               metrics=['accuracy'])                    
 
 
+# fitting_history = model.fit(x, y, batch_size=32, epochs=10, validation_split=0.2)
+
+# model.save('model-2-4.keras')
 
 
+# pickle_out = open("history.pickle", "wb")
+# pickle.dump(fitting_history, pickle_out)
+# pickle_out.close()
+
+
+#----------------------------------------------------------Code to Plot Model Fitting ------------------------------------------------------------#
+
+fitting_history = pickle.load(open("history.pickle","rb"))
+
+
+ #------------Training Loss vs Validation Loss Plotting------------#
+
+# Extract loss values
+train_loss = fitting_history.history['loss']
+val_loss = fitting_history.history['val_loss']
+epochs = range(1, len(train_loss) + 1)
+
+# Plot loss
+plt.figure(figsize=(8,6))
+plt.plot(epochs, train_loss, 'bo-', label='Training Loss')  # 'bo-' = blue dots + line
+plt.plot(epochs, val_loss, 'r^-', label='Validation Loss')  # 'r^-' = red triangles + line
+plt.xlabel('Epochs')
+plt.ylabel('Loss')
+plt.title('Training vs Validation Loss')
+plt.legend()
+plt.grid()
+plt.show()
+
+
+#---------Accuracy vs Validation Accuracy Plotting------------#
+
+train_acc = fitting_history.history['accuracy']
+val_acc = fitting_history.history['val_accuracy']
+
+plt.figure(figsize=(8,6))
+plt.plot(epochs, train_acc, 'bo-', label='Training Accuracy')
+plt.plot(epochs, val_acc, 'r^-', label='Validation Accuracy')
+plt.xlabel('Epochs')
+plt.ylabel('Accuracy')
+plt.title('Training vs Validation Accuracy')
+plt.legend()
+plt.grid()
+plt.show()
+
+
+
+
+
+
+
+
+#----------------------------------------------------------Code to Evaluate Model------------------------------------------------------------#
+
+# from tensorflow.keras.models import load_model
+
+# model = load_model('model-2-4.keras')
+
+# evaluating_history = model.evaluate(x, y)
+
+# print(history)
 
 
 
