@@ -112,54 +112,54 @@ import pickle
 # y = np.array(y)
 
 
-# # Set up K-Fold Cross-Validation
-# kf = KFold(n_splits=5, shuffle=True, random_state=42)
-# fold_accuracies = []
+# # # Set up K-Fold Cross-Validation
+# # kf = KFold(n_splits=5, shuffle=True, random_state=42)
+# # fold_accuracies = []
 
-# # Perform 5-Fold Cross-Validation
-# for fold, (train_idx, val_idx) in enumerate(kf.split(x)):
-#     print(f"\nTraining on fold {fold + 1}...")
+# # # Perform 5-Fold Cross-Validation
+# # for fold, (train_idx, val_idx) in enumerate(kf.split(x)):
+# #     print(f"\nTraining on fold {fold + 1}...")
 
-#     x_train, x_val = x[train_idx], x[val_idx]
-#     y_train, y_val = y[train_idx], y[val_idx]
-
-
-
-#     model = Sequential([
-#         Input(shape=x.shape[1:]), #can mess with shape too
-#         Conv2D(64, (3,3)),  
-#         Activation("relu"),
-#         MaxPooling2D(pool_size=(2,2)),
-
-#         Conv2D(64, (3,3)),
-#         Activation("relu"),
-#         MaxPooling2D(pool_size=(2,2)),
-
-#         Flatten(),  # do i need this
-#         Dense(64),
-#         Activation("relu"),
-#         Dense(1),
-#         Activation('sigmoid')
-#     ])
-
-#     model.compile(loss="binary_crossentropy",                #couldve been categorical_crossentropy
-#                 optimizer="adam",
-#                 metrics=['accuracy'])                    
+# #     x_train, x_val = x[train_idx], x[val_idx]
+# #     y_train, y_val = y[train_idx], y[val_idx]
 
 
-# # fitting_history = model.fit(x, y, batch_size=32, epochs=10)
 
-#     history = model.fit(x_train, y_train, batch_size=32, epochs=10, validation_data=(x_val, y_val), verbose=1)
+# model = Sequential([
+#     Input(shape=x.shape[1:]), #can mess with shape too
+#     Conv2D(64, (3,3)),  
+#     Activation("relu"),
+#     MaxPooling2D(pool_size=(2,2)),
 
-#     # Store accuracy of this fold
-#     val_acc = history.history['val_accuracy'][-1]  # Take last validation accuracy
-#     fold_accuracies.append(val_acc)
+#     Conv2D(64, (3,3)),
+#     Activation("relu"),
+#     MaxPooling2D(pool_size=(2,2)),
 
-#     print(f"Fold {fold + 1} Validation Accuracy: {val_acc:.4f}")
+#     Flatten(),  # do i need this
+#     Dense(64),
+#     Activation("relu"),
+#     Dense(1),
+#     Activation('sigmoid')
+# ])
 
-# print("\nFinal Cross-Validation Accuracy:", np.mean(fold_accuracies))
+# model.compile(loss="binary_crossentropy",                #couldve been categorical_crossentropy
+#             optimizer="adam",
+#             metrics=['accuracy'])                    
 
-# model.save('models/model-2-20.keras')
+
+# fitting_history = model.fit(x, y, batch_size=32, epochs=10, verbose=1) # validation_split=0.2
+
+# # history = model.fit(x_train, y_train, batch_size=32, epochs=10, validation_data=(x_val, y_val), verbose=1)
+
+# #     # Store accuracy of this fold
+# #     val_acc = history.history['val_accuracy'][-1]  # Take last validation accuracy
+# #     fold_accuracies.append(val_acc)
+
+# #     print(f"Fold {fold + 1} Validation Accuracy: {val_acc:.4f}")
+
+# # print("\nFinal Cross-Validation Accuracy:", np.mean(fold_accuracies))
+
+# model.save('models/model-2-20_2.keras')
 
 
 # pickle_out = open("pickles/history.pickle", "wb")
@@ -216,7 +216,7 @@ import pickle
 
 from tensorflow.keras.models import load_model
 
-model = load_model('models/model-2-20.keras')
+model = load_model('models/model-2-20_2.keras')
 
 x = pickle.load(open("pickles/x_test.pickle","rb"))
 y = pickle.load(open("pickles/y_test.pickle","rb"))
