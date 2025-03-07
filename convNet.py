@@ -103,68 +103,115 @@ from sklearn.model_selection import KFold
 import tensorflow as tensorflow
 from tensorflow.keras.models import Sequential
 from tensorflow.keras.layers import Dense, Dropout, Activation, Conv2D, MaxPooling2D, Flatten, Input
+from tensorflow.keras.optimizers import Adam
+from keras import callbacks
 import pickle
 
-# x = pickle.load(open("pickles/x.pickle","rb"))
-# y = pickle.load(open("pickles/y.pickle","rb"))
+x = pickle.load(open("pickles/x.pickle","rb"))
+y = pickle.load(open("pickles/y.pickle","rb"))
 
-# x = x/255.0
-# y = np.array(y)
+x = x/255.0
+y = np.array(y)
 
+histories = {}
 
-# # # Set up K-Fold Cross-Validation
-# # kf = KFold(n_splits=5, shuffle=True, random_state=42)
-# # fold_accuracies = []
+# Hyperparameter search space
+dense_layers = [0,1,2]
+conv_layers = [1,2,3]
 
-# # # Perform 5-Fold Cross-Validation
-# # for fold, (train_idx, val_idx) in enumerate(kf.split(x)):
-# #     print(f"\nTraining on fold {fold + 1}...")
-
-# #     x_train, x_val = x[train_idx], x[val_idx]
-# #     y_train, y_val = y[train_idx], y[val_idx]
-
+layer_sizes = [32, 64, 128]
+kernel_sizes = [(3,3), (5,5)]
+dense_sizes = [32, 64, 128]
+batch_sizes = [16, 32]
 
 
-# model = Sequential([
-#     Input(shape=x.shape[1:]), #can mess with shape too
-#     Conv2D(64, (3,3)),  
-#     Activation("relu"),
-#     MaxPooling2D(pool_size=(2,2)),
+epochs = [10, 20]
+# learning_rate = [0.001, 0.0001]
 
-#     Conv2D(64, (3,3)),
-#     Activation("relu"),
-#     MaxPooling2D(pool_size=(2,2)),
+earlystopping = callbacks.EarlyStopping(monitor="val_loss",
+                                        mode="min",
+                                        patience=2,
+                                        restore_best_weights=True)
 
-#     Flatten(),  # do i need this
-#     Dense(64),
-#     Activation("relu"),
-#     Dense(1),
-#     Activation('sigmoid')
-# ])
+index = 1
+
+# Iterate over hyperparameters
+for dense_layer in dense_layers:
+    for conv_layer in conv_layers:
+        for layer in layer_sizes:
+            for kernel_size in kernel_sizes:
+                for dense_size in dense_sizes:
+                    for batch_size in batch_sizes:
+                        for epoch in epochs:
+
+                            log_string = f"\nTest {index}: DenseLayers={dense_layer}, ConvLayers={conv_layer}, LayerSize={layer}, Kernel={kernel_size}, Dense={dense_size}, Batch={batch_size}, Epochs={epoch}\n\n"
+                            print(log_string)
+
+
+
+                            model = Sequential()
+                            model.add(Input(shape=x.shape[1:]))
+                            model.add(Conv2D(layer, kernel_size)) # input_shape=x.shape[1:]
+                            model.add(Activation("relu"))
+                            model.add(MaxPooling2D(pool_size=(2,2)))
+
+                            for i in range (conv_layer -1):
+                                model.add(Conv2D(layer, kernel_size))
+                                model.add(Activation("relu"))
+                                model.add(MaxPooling2D(pool_size=(2,2)))
+
+                            model.add(Flatten())
+                            for i in range(dense_layer):
+                                model.add(Dense(dense_size))
+                                model.add(Activation("relu"))
+
+                            model.add(Dense(1))
+                            model.add(Activation('sigmoid'))
+
+                            
+                            
+
+
+                            # model = Sequential([
+                            #     Input(shape=x.shape[1:]), #can mess with shape too
+                            #     Conv2D(64, (3,3)),  
+                            #     Activation("relu"),
+                            #     MaxPooling2D(pool_size=(2,2)),
+
+                            #     Conv2D(64, (3,3)),
+                            #     Activation("relu"),
+                            #     MaxPooling2D(pool_size=(2,2)),
+
+                            #     Flatten(),  # do i need this
+                            #     Dense(64),
+                            #     Activation("relu"),
+                            #     Dense(1),
+                            #     Activation('sigmoid')
+                            # ])
+
+
+                            # optimizer = Adam(learning_rate=lr)
+                            model.compile(optimizer="adam", loss='binary_crossentropy', metrics=['accuracy'])
+                            
+                            histories[log_string] = (model.fit(x, y, validation_split=0.2, epochs=epoch, batch_size=batch_size, verbose=1, callbacks=[earlystopping])).history # callbacks=[EarlyStopping(monitor='val_accuracy', patience=3, restore_best_weights=True)]
+                            index += 1
+                            print(histories)
+
+
 
 # model.compile(loss="binary_crossentropy",                #couldve been categorical_crossentropy
 #             optimizer="adam",
 #             metrics=['accuracy'])                    
-
-
 # fitting_history = model.fit(x, y, batch_size=32, epochs=10, verbose=1) # validation_split=0.2
 
-# # history = model.fit(x_train, y_train, batch_size=32, epochs=10, validation_data=(x_val, y_val), verbose=1)
 
-# #     # Store accuracy of this fold
-# #     val_acc = history.history['val_accuracy'][-1]  # Take last validation accuracy
-# #     fold_accuracies.append(val_acc)
-
-# #     print(f"Fold {fold + 1} Validation Accuracy: {val_acc:.4f}")
-
-# # print("\nFinal Cross-Validation Accuracy:", np.mean(fold_accuracies))
 
 # model.save('models/model-2-20_2.keras')
 
 
-# pickle_out = open("pickles/history.pickle", "wb")
-# pickle.dump(fitting_history, pickle_out)
-# pickle_out.close()
+pickle_out = open("pickles/history.pickle", "wb")
+pickle.dump(histories, pickle_out)
+pickle_out.close()
 
 
 #----------------------------------------------------------Code to Plot Model Fitting ------------------------------------------------------------#
@@ -216,20 +263,59 @@ import pickle
 
 from tensorflow.keras.models import load_model
 
-model = load_model('models/model-2-20_2.keras')
+# model = load_model('models/model-2-20_2.keras')
 
-x = pickle.load(open("pickles/x_test.pickle","rb"))
-y = pickle.load(open("pickles/y_test.pickle","rb"))
+# x_test = pickle.load(open("pickles/x_test.pickle","rb"))
+# y_test = pickle.load(open("pickles/y_test.pickle","rb"))
 
-x = x/255.0
-y = np.array(y)
+# x_test = x_test/255.0
+# y_test = np.array(y_test)
 
-evaluating_history = model.evaluate(x, y)
-print(evaluating_history)
+# evaluating_history = model.evaluate(x_test, y_test)
+# print("Test Loss:", evaluating_history[0])
+# print("Test Accuracy:", evaluating_history[1])
 
+
+#----------------------------------------------------------Code to Plot Confusion Matrix------------------------------------------------------------#
+
+
+from sklearn.metrics import confusion_matrix, ConfusionMatrixDisplay, precision_score, recall_score, f1_score, accuracy_score
+
+
+#in test data, 360 benign pics, and 300 malignant
+
+
+# Predict the test data
+# y_pred = model.predict(x_test)
+# threshold = 0.5
+# y_pred_classes = (np.array(y_pred) > threshold).astype(int)
+# y_true_classes = y_test  # Convert one-hot encoded labels to class labels
+
+# # Compute the confusion matrix
+# cm = confusion_matrix(y_true_classes, y_pred_classes)
+
+# # Plot the confusion matrix
+# disp = ConfusionMatrixDisplay(confusion_matrix=cm)
+# disp.plot(cmap=plt.cm.Blues)
+# plt.title('Confusion Matrix')
+
+
+# # Calculate precision, recall, F1-score, and accuracy
+# precision = precision_score(y_true_classes, y_pred_classes, average='weighted')
+# recall = recall_score(y_true_classes, y_pred_classes, average='weighted')
+# f1 = f1_score(y_true_classes, y_pred_classes, average='weighted')
+# accuracy = accuracy_score(y_true_classes, y_pred_classes)
+
+# print("Precision:", precision)
+# print("Recall:", recall)
+# print("F1-Score:", f1)
+# print("Accuracy:", accuracy)
+# plt.show()
 
 
 
 # plot confusion matrix
 # figure out f score, precision, accuracy
 # try with kernel size 5
+
+# save fig
