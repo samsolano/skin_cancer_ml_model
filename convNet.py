@@ -7,7 +7,7 @@ import cv2                      # for image operations
 import random
 import pickle
 
-DATADIR = "/Users/samsolano/Documents/WorkFolder/SeniorProject/Skin_Cancer_Archive/train"
+DATADIR = "C:\\Users\\samue\\OneDrive\\Desktop\\Projects\\seniorProject_skinCancer\\pics\\train"
 CATEGORIES = ["benign", "malignant"]
 
 
@@ -57,7 +57,7 @@ CATEGORIES = ["benign", "malignant"]
 
 #----------------------------------------------------------Code to Normailze Testing Data------------------------------------------------------------#
 
-# DATADIRTEST = "/Users/samsolano/Documents/WorkFolder/SeniorProject/Skin_Cancer_Archive/test"
+# DATADIRTEST = "C:\\Users\\samue\\OneDrive\\Desktop\\Projects\\seniorProject_skinCancer\\pics\\test"
 
 # training_data = []
 
@@ -97,13 +97,14 @@ CATEGORIES = ["benign", "malignant"]
 # pickle.dump(y, pickle_out)
 # pickle_out.close()
 
+# print("test data done")
+
 
 #----------------------------------------------------------Code to Train and Save Model------------------------------------------------------------#
-from sklearn.model_selection import KFold
 import tensorflow as tensorflow
 from tensorflow.keras.models import Sequential
 from tensorflow.keras.layers import Dense, Dropout, Activation, Conv2D, MaxPooling2D, Flatten, Input
-from tensorflow.keras.optimizers import Adam
+# from tensorflow.keras.optimizers import Adam
 from keras import callbacks
 import pickle
 
@@ -115,27 +116,33 @@ y = np.array(y)
 
 histories = {}
 
-# Hyperparameter search space
-dense_layers = [0,1,2]
-conv_layers = [1,2,3]
 
-layer_sizes = [32, 64, 128]
-kernel_sizes = [(3,3), (5,5)]
-dense_sizes = [32, 64, 128]
-batch_sizes = [16, 32]
-
-
-epochs = [10, 20]
-# learning_rate = [0.001, 0.0001]
 
 earlystopping = callbacks.EarlyStopping(monitor="val_loss",
                                         mode="min",
                                         patience=2,
                                         restore_best_weights=True)
 
+
+dense_layers = [0]
+conv_layers = [3]
+kernel_sizes = [(3,3), (5,5)]
+
+
+layer_sizes = [128]
+# dense_sizes = [32, 64, 128]
+dense_sizes = [32]
+batch_sizes = [32]
+
+
+epochs = [5, 10, 20]
+# learning_rate = [0.001, 0.0001]
+
+
+
 index = 1
 
-# Iterate over hyperparameters
+
 for dense_layer in dense_layers:
     for conv_layer in conv_layers:
         for layer in layer_sizes:
@@ -144,14 +151,14 @@ for dense_layer in dense_layers:
                     for batch_size in batch_sizes:
                         for epoch in epochs:
 
-                            log_string = f"\nTest {index}: DenseLayers={dense_layer}, ConvLayers={conv_layer}, LayerSize={layer}, Kernel={kernel_size}, Dense={dense_size}, Batch={batch_size}, Epochs={epoch}\n\n"
+                            log_string = f"\nTest {index}: Kernel={kernel_size}, Epochs={epoch}\n\n"
                             print(log_string)
 
 
 
                             model = Sequential()
                             model.add(Input(shape=x.shape[1:]))
-                            model.add(Conv2D(layer, kernel_size)) # input_shape=x.shape[1:]
+                            model.add(Conv2D(layer, kernel_size)) 
                             model.add(Activation("relu"))
                             model.add(MaxPooling2D(pool_size=(2,2)))
 
@@ -161,41 +168,45 @@ for dense_layer in dense_layers:
                                 model.add(MaxPooling2D(pool_size=(2,2)))
 
                             model.add(Flatten())
-                            for i in range(dense_layer):
-                                model.add(Dense(dense_size))
-                                model.add(Activation("relu"))
+                            # for i in range(dense_layer):
+                            #     model.add(Dense(dense_size))
+                            #     model.add(Activation("relu"))
 
                             model.add(Dense(1))
                             model.add(Activation('sigmoid'))
 
-                            
-                            
 
 
-                            # model = Sequential([
-                            #     Input(shape=x.shape[1:]), #can mess with shape too
-                            #     Conv2D(64, (3,3)),  
-                            #     Activation("relu"),
-                            #     MaxPooling2D(pool_size=(2,2)),
-
-                            #     Conv2D(64, (3,3)),
-                            #     Activation("relu"),
-                            #     MaxPooling2D(pool_size=(2,2)),
-
-                            #     Flatten(),  # do i need this
-                            #     Dense(64),
-                            #     Activation("relu"),
-                            #     Dense(1),
-                            #     Activation('sigmoid')
-                            # ])
-
-
-                            # optimizer = Adam(learning_rate=lr)
                             model.compile(optimizer="adam", loss='binary_crossentropy', metrics=['accuracy'])
-                            
+
                             histories[log_string] = (model.fit(x, y, validation_split=0.2, epochs=epoch, batch_size=batch_size, verbose=1, callbacks=[earlystopping])).history # callbacks=[EarlyStopping(monitor='val_accuracy', patience=3, restore_best_weights=True)]
                             index += 1
                             print(histories)
+
+
+
+
+# model = Sequential([
+#     Input(shape=x.shape[1:]), #can mess with shape too
+#     Conv2D(64, (3,3)),  
+#     Activation("relu"),
+#     MaxPooling2D(pool_size=(2,2)),
+
+#     Conv2D(64, (3,3)),
+#     Activation("relu"),
+#     MaxPooling2D(pool_size=(2,2)),
+
+#     Flatten(),  # do i need this
+#     Dense(64),
+#     Activation("relu"),
+#     Dense(1),
+#     Activation('sigmoid')
+# ])
+
+# optimizer = Adam(learning_rate=lr)
+
+
+
 
 
 
