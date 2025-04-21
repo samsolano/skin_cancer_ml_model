@@ -126,16 +126,16 @@ earlystopping = callbacks.EarlyStopping(monitor="val_loss",
 
 dense_layers = [0]
 conv_layers = [3]
-kernel_sizes = [(3,3), (5,5)]
+kernel_sizes = [(3,3)]
 
 
 layer_sizes = [128]
 # dense_sizes = [32, 64, 128]
 dense_sizes = [32]
-batch_sizes = [32]
+batch_sizes = [16,32]
 
 
-epochs = [5, 10, 20]
+epochs = [5]
 # learning_rate = [0.001, 0.0001]
 
 
